@@ -1,0 +1,99 @@
+:root {
+  --tinyRail-collapsed: 2px;
+  --tinyRail-expanded: 40px;
+  --tinyRail-icon: 22px;
+  --tinyRail-gap: 8px;
+  --tinyRail-bg: #0f1115;
+  --tinyRail-active: #3b82f6;
+}
+
+/* Pinned tab indicator */
+.__tinyTabRail__tab.pinned::after {
+  content: "📌";
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+#__tinyTabRail__rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--tinyRail-collapsed);
+  height: 100vh;
+  background: var(--tinyRail-bg);
+  border-right: 2px solid var(--tinyRail-active);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+  gap: var(--tinyRail-gap);
+  transition: width 0.15s ease;
+  z-index: 2147483647;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+#__tinyTabRail__rail:hover {
+  width: var(--tinyRail-expanded);
+}
+
+.__tinyTabRail__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--tinyRail-gap);
+}
+
+.__tinyTabRail__tab {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.__tinyTabRail__tab img {
+  width: var(--tinyRail-icon);
+  height: var(--tinyRail-icon);
+}
+
+.__tinyTabRail__tab.active {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+.__tinyTabRail__tab.active::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  width: 3px;
+  height: 16px;
+  background: var(--tinyRail-active);
+  border-radius: 2px;
+}
+
+#__tinyTabRail__tooltip {
+  position: fixed;
+  background: #1a1d23;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  white-space: nowrap;
+  z-index: 2147483647;
+  transition: opacity 0.1s ease;
+}
+
+/* Hide tabs when collapsed */
+#__tinyTabRail__rail:not(:hover) .__tinyTabRail__tab,
+#__tinyTabRail__rail:not(:hover) .__tinyTabRail__group {
+  display: none;
+}
+

@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "SHRM - Tiny Tab Rail Overlay",
+  "version": "1.3",
+  "description": "Persistent, synchronized tab sidebar. Source code: https://github.com/YourUsername/SHRM-Tiny-Tab-Rail",
+  "permissions": ["tabs", "windows", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "homepage_url": "https://github.com/bio-informatician/SHRM-Tiny-Tab-Rail",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["overlay.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "SHRM - Tiny Tab Rail"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
+
