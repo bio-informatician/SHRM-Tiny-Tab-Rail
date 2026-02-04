@@ -1,38 +1,44 @@
 // ---------------------------
 // SHRM - Tiny Tab Rail Overlay
+// Overlay / Content Script
 // ---------------------------
 
-// Prevent multiple overlays
 if (!document.getElementById("__tinyTabRail__rail")) {
-  // Main rail container
   const rail = document.createElement("div");
   rail.id = "__tinyTabRail__rail";
   document.body.appendChild(rail);
 
-  // Pinned tabs group
   const pinned = document.createElement("div");
   pinned.id = "__tinyTabRail__pinned";
   pinned.className = "__tinyTabRail__group";
   rail.appendChild(pinned);
 
-  // Other tabs group
   const tabs = document.createElement("div");
   tabs.id = "__tinyTabRail__tabs";
   tabs.className = "__tinyTabRail__group";
   rail.appendChild(tabs);
 
-  // Tooltip
   const tooltip = document.createElement("div");
   tooltip.id = "__tinyTabRail__tooltip";
   document.body.appendChild(tooltip);
 }
 
-// Elements references
 const pinnedEl = document.getElementById("__tinyTabRail__pinned");
 const tabsEl = document.getElementById("__tinyTabRail__tabs");
 const tooltip = document.getElementById("__tinyTabRail__tooltip");
 
 let tabsData = [];
+
+// ---------------------------
+// Safe message sender
+// ---------------------------
+function safeSendMessage(msg) {
+  try {
+    chrome.runtime.sendMessage(msg);
+  } catch (e) {
+    // ignore any errors
+  }
+}
 
 // ---------------------------
 // Render tabs
@@ -53,23 +59,20 @@ function renderTabs() {
     img.src = tab.favIconUrl;
     el.appendChild(img);
 
-    // Activate tab on click
-    el.onclick = () => {
-      chrome.runtime.sendMessage({ type: "activateTab", tabId: tab.id });
-    };
+    // Activate tab
+    el.onclick = () => safeSendMessage({ type: "activateTab", tabId: tab.id });
 
-    // Pin/unpin with right-click — safely capture tab
+    // Pin/unpin
     el.oncontextmenu = ((t) => (e) => {
       e.preventDefault();
-      chrome.runtime.sendMessage({ type: "togglePin", tabId: t.id, pinned: t.pinned });
+      safeSendMessage({ type: "togglePin", tabId: t.id, pinned: t.pinned });
     })(tab);
 
-    // Tooltip events
+    // Tooltip
     el.onmouseenter = e => showTooltip(e, tab);
     el.onmousemove = moveTooltip;
     el.onmouseleave = hideTooltip;
 
-    // Append to correct group
     if (tab.pinned) pinnedEl.appendChild(el);
     else tabsEl.appendChild(el);
   });
@@ -94,20 +97,26 @@ function hideTooltip() {
 }
 
 // ---------------------------
-// Initialization
+// Initialize overlay
 // ---------------------------
+function registerOverlay() {
+  chrome.runtime.sendMessage({ type: "overlayLoaded" }, (response) => {
+    if (response && response.tabs) {
+      tabsData = response.tabs;
+      renderTabs();
+    }
+  });
+}
 
-// Tell background this overlay is loaded
-chrome.runtime.sendMessage({ type: "overlayLoaded" });
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", registerOverlay);
+} else {
+  registerOverlay();
+}
 
-// Request current tabs immediately
-chrome.runtime.sendMessage({ type: "getTabs" }, (response) => {
-  if (!response) return;
-  tabsData = response.tabs;
-  renderTabs();
-});
-
-// Listen for updates from background
+// ---------------------------
+// Listen for updates
+// ---------------------------
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === "updateTabs") {
     tabsData = msg.tabs;
